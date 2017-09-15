@@ -22,7 +22,6 @@ parser.add_argument('-nC',type=float,default=10,help='number of chains in PCD')
 args = parser.parse_args()
 
 if args.command == 'train':
-    
     if args.model == 'ising2d':
         ising2d.train(args)
     if args.model == 'tfim1d':
