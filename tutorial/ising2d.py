@@ -168,7 +168,7 @@ def train(args):
 
 def sample(args):
        
-    T = args.t                      # temperature
+    T = args.T                      # temperature
     num_visible = args.L*args.L     # number of visible units 
     num_hidden = args.nH            # number of hidden units
     
