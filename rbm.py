@@ -3,9 +3,9 @@ import itertools as it
 import numpy as np
 
 class RBM(object):
-    
+
     ''' Restricted Boltzmann Machine '''
-    
+
     def __init__(self, num_hidden, num_visible, num_samples=128, weights=None, visible_bias=None, hidden_bias=None):
         ''' Constructor '''
         # number of hidden units
@@ -101,7 +101,7 @@ class RBM(object):
         self.hidden_samples = self.hidden_samples.assign(h_samples)
         self.p_of_v = p_of_v
         return self.hidden_samples, v_samples
-    
+
     def energy(self, hidden_samples, visible_samples):
         # type: (tf.Tensor, tf.Tensor) -> tf.Tensor
         """Compute the energy:
@@ -123,8 +123,8 @@ class RBM(object):
         free_energy = (tf.matmul(visible_samples, self.visible_bias)
                        + tf.reduce_sum(tf.nn.softplus(tf.matmul(visible_samples, self.weights)
                                                       + tf.transpose(self.hidden_bias)), 1, keep_dims=True))
-        return free_energy   
-    
+        return free_energy
+
     def neg_log_likelihood_grad(self, visible_samples, model_samples=None, num_gibbs=2):
         # type: (tf.Tensor, tf.Tensor, int) -> tf.Tensor
 
@@ -142,7 +142,7 @@ class RBM(object):
                        + tf.reduce_sum(tf.nn.softplus(tf.matmul(visible_samples, self.weights)
                                                       + tf.transpose(self.hidden_bias)), 1))
         return -tf.reduce_mean(free_energy - log_Z)
-    
+
     def exact_log_partition_function(self):
         ''' Evaluate the partition function by exact enumerations '''
         with tf.name_scope('exact_log_Z'):
