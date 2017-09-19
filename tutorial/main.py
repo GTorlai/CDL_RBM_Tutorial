@@ -1,4 +1,4 @@
-import ising2d 
+import ising2d
 import tfim1d
 import sampler
 import argparse
@@ -33,7 +33,7 @@ if args.command == 'sample':
         ising2d.sample(args)
     if args.model == 'tfim1d':
         tfim1d.sample(args)
-    
+
 if args.command == 'sample_all':
     if args.model == 'ising2d':
         sampler.ising2d()

@@ -6,7 +6,7 @@ Id = np.eye(2)
 Sx = np.array([[0,1.],[1,0]])
 Sz = np.array([[1,0.],[0,-1]])
 
-# Pauli X operator 
+# Pauli X operator
 def sigmaX(L,i):
     ''' Return the many-body operator
         I x I x .. x Sx x I x .. x I
@@ -34,11 +34,11 @@ def sigmaZ(L,i):
 
     return reduce(np.kron,OpList)
 
-# Magnetic interaction term 
+# Magnetic interaction term
 def buildMagneticInteraction(i,B,L):
     return B*sigmaX(L,i)
 
-# Ising interaction term 
+# Ising interaction term
 def buildIsingInteraction(i,j,J,L):
     ''' Return the Ising interaction term
         I x .. x Sz x Sz x .. x I
@@ -56,19 +56,19 @@ def buildIsingInteraction(i,j,J,L):
 
 # Build transverse-field Ising model
 def build1dIsingModel(L,J,B,OBC):
-    
+
     D = 1<<L    # dimension of Hilbert space
     ''' Return the full Hamiltonian '''
-    Ham = np.zeros((D,D))	
+    Ham = np.zeros((D,D))
     for i in range(L-1):
 	Ham = Ham - buildIsingInteraction(i,i+1,J,L)
-	Ham = Ham - buildMagneticInteraction(i,B,L)	
+	Ham = Ham - buildMagneticInteraction(i,B,L)
     Ham = Ham - buildMagneticInteraction(L-1,B,L)
-	
+
     # Periodic Boundary Conditions
     if OBC is True:
         Ham = Ham - buildIsingInteraction(0,L-1,J,L)
-    
+
     return Ham
 
 # Generate the training dataset
@@ -76,17 +76,17 @@ def buildDataset(L,B,psi,Nsamples):
 
     D = 1<<L
     config = np.zeros((D,L))
-    psi2 = np.zeros((D))  
-    
+    psi2 = np.zeros((D))
+
     # Build all spin states and psi^2
     for i in range(D):
         state = (bin(i)[2:].zfill(L)).split()
         for j in range(L):
             config[i,j] = int(state[0][j])
-        psi2[i] = psi[i]**2 
-    
+        psi2[i] = psi[i]**2
+
     config_index = range(D)
-    
+
     # Generate the trainset
     index_samples = np.random.choice(config_index,
                                      Nsamples,
@@ -99,7 +99,7 @@ def buildDataset(L,B,psi,Nsamples):
             dataFile.write("%d " % config[index_samples[i]][j])
         dataFile.write("\n")
     dataFile.close()
-    
+
     # Generate the testset
     index_samples = np.random.choice(config_index,
                                      Nsamples/10,
@@ -114,16 +114,16 @@ def buildDataset(L,B,psi,Nsamples):
 
 # MAIN
 def main(pars):
-	
+
     print ('\n--------------------------------\n')
     print ('EXACT DIAGONALIZATION OF THE 1d-TFIM\n')
-     
+
     # Parameters
     L = pars.L;         # number of spins
-    B = pars.B          # magnetic field 
+    B = pars.B          # magnetic field
     J = pars.J          # ising interaction strength
     Nsamples = 10000    # train dataset size
-    
+
     print ('Number of spins    L = %d' % L)
     print ('Ising interaction  J = %.1f' % J)
     print ('\n\n')
@@ -133,38 +133,38 @@ def main(pars):
     Bmax = 2.0
     Bsteps = 10
     deltaB = (Bmax-Bmin)/float(Bsteps)
-    
+
     # Observables file
     obs_Name = '../data/tfim1d/observables/ed_tfim1d_L' + str(L) + '_observables.txt'
     obs_File = open(obs_Name,'w')
     obs_File.write('# B               E         ')  # write header
     obs_File.write('<|Sz|>           <Sx>\n')       # write header
-    
+
     # Spin-spin correlation file
     corr_Name = '../data/tfim1d/observables/ed_tfim1d_L' + str(L) + '_correlations.txt'
     corr_File = open(corr_Name,'w')
-    
+
     # Loop over magnetic field values
     for b in range(1,Bsteps+1):
-        
+
         B = Bmin + b*deltaB
-        print('Magnetic field B = %.2f' % B) 
+        print('Magnetic field B = %.2f' % B)
 
         # Wavefunction file
         psiName  = '../data/tfim1d/wavefunctions/wavefunction_tfim1d_L' + str(L)
         psiName += '_B' + str(B) + '.txt'
-        
+
         # Diagonalize the Hamiltonian
         print('diagonalizing...')
         H = build1dIsingModel(L,J,B,True)
         (e,psi) = np.linalg.eigh(H)
         psi0 = np.abs(psi[:,0])
         e0 = e[0]
-        
+
         # Save energy and wavefunction
         obs_File.write('%.1f   %.10f   ' % (B,e0/float(L)))
         np.savetxt(psiName,psi0)
-        
+
         # Magnetic observables
         print('computing observables...')
         # Compute <|Sz|>
@@ -184,13 +184,13 @@ def main(pars):
             for j in range(L):
                 for k in range(1<<L):
                     config = (bin(k)[2:].zfill(L)).split()
-                    SzSz[i,j] += (psi0[k]**2)*(2*float(config[0][i])-1)*(2*float(config[0][j])-1) 
+                    SzSz[i,j] += (psi0[k]**2)*(2*float(config[0][i])-1)*(2*float(config[0][j])-1)
                 corr_File.write('%.10f   ' % SzSz[i,j])
             corr_File.write('\n')
-        
+
         # Generate the training datasets
         print('generating the dataset...')
-        buildDataset(L,B,psi0,Nsamples) 
+        buildDataset(L,B,psi0,Nsamples)
         print('\n')
 
 
@@ -198,7 +198,7 @@ def main(pars):
 
 
 if __name__ == "__main__":
-   
+
     # Read arguments from command line
     parser = argparse.ArgumentParser()
     parser.add_argument('-L',type=int,default=10)
